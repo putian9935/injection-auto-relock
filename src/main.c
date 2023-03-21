@@ -1,17 +1,15 @@
 #include <stdlib.h>
-
-#include "rp.h"
-#include "read.h"
-#include "write.h"
-#include "length_lock.h"
-#include "current_lock.h"
-
 #include <unistd.h>
-int main(int argc, char **argv)
-{
 
-    if (rp_Init() != RP_OK)
-    {
+#include "config.h"
+#include "current_lock.h"
+#include "length_lock.h"
+#include "read.h"
+#include "rp.h"
+#include "write.h"
+
+int main(int argc, char **argv) {
+    if (rp_Init() != RP_OK) {
         exit(-1);
     }
 
@@ -24,17 +22,14 @@ int main(int argc, char **argv)
     usleep(20000);
 
     // start length lock for some time
-    // peak_detect will also set current setpoint 
-    init_length_lock(0.0002, 0.0001, 0.00, peak_detect());
-    for(int i = 0; i < 200; ++i)
-        update_length_lock();
+    // peak_detect will also set current setpoint
+    init_length_lock(LENGTH_KP, LENGTH_KI, LENGTH_KD, peak_detect());
+    for (int i = 0; i < 200; ++i) update_length_lock();
 
-    // start current lock 
-    init_current_lock(.2, .2, 0.1, .5);
-    while(1)
-    {
-        for(int i = 0; i < 250; ++i)
-            update_length_lock();
+    // start current lock
+    init_current_lock(CURRENT_KP, CURRENT_KI, CURRENT_KD, .5);
+    while (1) {
+        for (int i = 0; i < 250; ++i) update_length_lock();
         update_current_lock();
     }
 

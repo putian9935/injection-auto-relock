@@ -2,6 +2,7 @@
 #include "peak_detect.h"
 #include "write.h"
 #include "read.h"
+#include "config.h"
 
 extern double current_setpoint;
 #include <unistd.h> 
@@ -21,6 +22,6 @@ float peak_detect()
             ret = i;
         }
     }
-    current_setpoint = 0.996 * min_height; // setpoint slight above 
+    current_setpoint = SETP_TO_MIN_RATIO * min_height; // setpoint slight above 
     return ret;
 }
