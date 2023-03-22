@@ -9,10 +9,13 @@
 #include "read.h"
 #include "write.h"
 
+#ifdef USE_SLACK
+#include "send_slack.h"
+#endif
+
 double current_setpoint;
 
 static double kp, ki, kd;
-
 static double get_error() { return -(read_ch1_avg() - current_setpoint); }
 
 void init_current_lock(double kp_, double ki_, double kd_, double offset_) {
@@ -30,11 +33,14 @@ void update_current_lock() {
     // new PID output
     float out = (kp * error + ki * integral + kd * (error - last_error)) +
                 current_offset;
-    // printf("current_out %lf sp %lf ofset %lf \n", out, current_setpoint,
-    // current_offset);
     // unlocks, also takes care of  anti-windup
     if (out > CURRENT_LOCK_UPPER_BOUND || out < CURRENT_LOCK_UPPER_BOUND) {
+#ifdef USE_SLACK
+        sprintf(slack_message_buffer, "unlock detected at out %lf\n", out);
+        send_message(slack_message_buffer);
+#else
         printf("unlock detected at out %lf\n", out);
+#endif
         integral = 0.;
         last_error = 0;
 #ifndef RELOCK_WITH_STEP
@@ -47,21 +53,37 @@ void update_current_lock() {
                 current = current - 0.001;
                 write_ch2(current);
                 if (read_ch1_avg() >
-                    RELOCK_TO_SETPOINT_RATIO * current_setpoint)
+                    RELOCK_TO_SETPOINT_RATIO * current_setpoint) {
+#ifdef USE_SLACK
+                    sprintf(slack_message_buffer, "relock at %lf\n", current);
+                    send_message(slack_message_buffer);
+#else
+                    printf("relock at %lf\n", current);
+#endif
                     return;
+                }
                 usleep(1000);
             }
-
-            printf("relock at %lf\n", current);
         }
 #else
         while (read_ch1_avg() > RELOCK_TO_SETPOINT_RATIO * current_setpoint) {
+#ifdef USE_SLACK
+            sprintf(slack_message_buffer, "relocking\n");
+            send_message(slack_message_buffer);
+#else
             printf("relocking\n");
+#endif
             write_ch2(RELOCK_HIGH_CURRENT);
             usleep(RELOCK_HIGH_HOLDTIME);
             write_ch2(RELOCK_LOW_CURRENT);
             usleep(RELOCK_LOW_HOLDTIME);
         }
+#ifdef USE_SLACK
+        sprintf(slack_message_buffer, "relocked\n");
+        send_message(slack_message_buffer);
+#else
+        printf("relocked\n");
+#endif
 #endif
     } else {
         write_ch2(out);
