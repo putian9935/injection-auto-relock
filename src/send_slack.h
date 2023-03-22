@@ -8,7 +8,6 @@
 #ifndef SEND_SLACK_H
 #define SEND_SLACK_H
 
-#define USE_SLACK 
 #ifdef USE_SLACK
 #ifndef SLACK_WEBHOOK_URL
 #error cannot find webhook url definition, aborted

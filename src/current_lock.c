@@ -34,7 +34,7 @@ void update_current_lock() {
     float out = (kp * error + ki * integral + kd * (error - last_error)) +
                 current_offset;
     // unlocks, also takes care of  anti-windup
-    if (out > CURRENT_LOCK_UPPER_BOUND || out < CURRENT_LOCK_UPPER_BOUND) {
+    if (out > CURRENT_LOCK_UPPER_BOUND || out < CURRENT_LOCK_LOWER_BOUND) {
 #ifdef USE_SLACK
         sprintf(slack_message_buffer, "unlock detected at out %lf\n", out);
         send_message(slack_message_buffer);
@@ -52,7 +52,7 @@ void update_current_lock() {
             while (current > CURRENT_LOCK_LOWER_BOUND) {
                 current = current - 0.001;
                 write_ch2(current);
-                if (read_ch1_avg() >
+                if (read_ch1_avg() <
                     RELOCK_TO_SETPOINT_RATIO * current_setpoint) {
 #ifdef USE_SLACK
                     sprintf(slack_message_buffer, "relock at %lf\n", current);
@@ -62,7 +62,7 @@ void update_current_lock() {
 #endif
                     return;
                 }
-                usleep(1000);
+                usleep(800);
             }
         }
 #else

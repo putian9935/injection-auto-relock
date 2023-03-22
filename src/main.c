@@ -8,6 +8,10 @@
 #include "rp.h"
 #include "write.h"
 
+#ifdef USE_SLACK
+#include "send_slack.h"
+#endif
+
 int main(int argc, char **argv) {
     if (rp_Init() != RP_OK) {
         exit(-1);
@@ -16,6 +20,11 @@ int main(int argc, char **argv) {
     // initialize read and write
     write_prepare();
     read_prepare();
+
+#ifdef USE_SLACK
+    // initialize curl
+    init_send_slack();
+#endif
 
     // put current to lock point and wait
     write_ch2(.5);

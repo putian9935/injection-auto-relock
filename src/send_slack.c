@@ -19,8 +19,8 @@ void init_send_slack() {
 }
 
 void send_message(char *msg) {
-    char *post = malloc(strlen(msg) + 13);
-    memset(post, 0, strlen(msg) + 13);
+    static char post[10001];
+    post[0] = '\0';
     curl_easy_setopt(curl, CURLOPT_URL, SLACK_WEBHOOK_URL);
     strcat(post, "{'text':'");
     strcat(post, msg);
