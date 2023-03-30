@@ -33,14 +33,13 @@ void update_current_lock() {
     // new PID output
     float out = (kp * error + ki * integral + kd * (error - last_error)) +
                 current_offset;
-    // unlocks, also takes care of  anti-windup
+    // unlocks, also takes care of anti-windup
     if (out > CURRENT_LOCK_UPPER_BOUND || out < CURRENT_LOCK_LOWER_BOUND) {
 #ifdef USE_SLACK
         sprintf(slack_message_buffer, "unlock detected at out %lf\n", out);
         send_message(slack_message_buffer);
-#else
-        printf("unlock detected at out %lf\n", out);
 #endif
+        printf("unlock detected at out %lf\n", out);
         integral = 0.;
         last_error = 0;
 #ifndef RELOCK_WITH_STEP
@@ -57,9 +56,8 @@ void update_current_lock() {
 #ifdef USE_SLACK
                     sprintf(slack_message_buffer, "relock at %lf\n", current);
                     send_message(slack_message_buffer);
-#else
-                    printf("relock at %lf\n", current);
 #endif
+                    printf("relock at %lf\n", current);
                     return;
                 }
                 usleep(800);
@@ -70,9 +68,8 @@ void update_current_lock() {
 #ifdef USE_SLACK
             sprintf(slack_message_buffer, "relocking\n");
             send_message(slack_message_buffer);
-#else
-            printf("relocking\n");
 #endif
+            printf("relocking\n");
             write_ch2(RELOCK_HIGH_CURRENT);
             usleep(RELOCK_HIGH_HOLDTIME);
             write_ch2(RELOCK_LOW_CURRENT);
@@ -81,9 +78,8 @@ void update_current_lock() {
 #ifdef USE_SLACK
         sprintf(slack_message_buffer, "relocked\n");
         send_message(slack_message_buffer);
-#else
-        printf("relocked\n");
 #endif
+        printf("relocked\n");
 #endif
     } else {
         write_ch2(out);

@@ -62,11 +62,11 @@
  * @{
  */
 #ifndef CURRENT_KP
-#define CURRENT_KP (0.7)
+#define CURRENT_KP (0.6)
 #endif
 
 #ifndef CURRENT_KI
-#define CURRENT_KI (0.025)
+#define CURRENT_KI (0.02)
 #endif
 
 #ifndef CURRENT_KD
@@ -176,5 +176,5 @@
  * 
  * 
  */
-#define RELOCK_TO_SETPOINT_RATIO (0.93)
+#define RELOCK_TO_SETPOINT_RATIO (0.98)
 #endif

@@ -24,6 +24,7 @@ target_compile_options(lock PRIVATE -Wall -Wpedantic -Wextra)
 set_property(TARGET lock PROPERTY C_STANDARD 11)
 
 target_link_libraries( lock inj-relck ${RP_LIB} ${CURL_LIB} )
+# un-comment the following and comment the previous line if send slack is needed 
 # target_link_libraries( lock inj-relck send-slack ${RP_LIB} ${CURL_LIB} )
 
 # TARGET2: sweep

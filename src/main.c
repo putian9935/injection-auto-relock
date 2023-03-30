@@ -26,7 +26,9 @@ int main(int argc, char **argv) {
     init_send_slack();
 #endif
 
-    // put current to lock point and wait
+    // put current high, then to lock point, and wait
+    write_ch2(1);
+    usleep(200000);
     write_ch2(.5);
     usleep(20000);
 
