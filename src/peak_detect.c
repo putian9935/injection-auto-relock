@@ -1,4 +1,3 @@
-
 #include "peak_detect.h"
 #include "write.h"
 #include "read.h"
@@ -23,5 +22,6 @@ float peak_detect()
         }
     }
     current_setpoint = SETP_TO_MIN_RATIO * min_height; // setpoint slight above 
+    fprintf(stderr, "Current setpint %lf at PZT output %\lf.\n", current_setpoint, ret);
     return ret;
 }
