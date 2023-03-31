@@ -39,12 +39,12 @@ void update_current_lock() {
         sprintf(slack_message_buffer, "unlock detected at out %lf\n", out);
         send_message(slack_message_buffer);
 #endif
-        printf("unlock detected at out %lf\n", out);
+        fprintf(stderr, "unlock detected at out %lf\n", out);
         integral = 0.;
         last_error = 0;
 #ifndef RELOCK_WITH_STEP
         while (read_ch1_avg() > RELOCK_TO_SETPOINT_RATIO * current_setpoint) {
-            printf("relocking\n");
+            fprintf(stderr, "relocking\n");
             write_ch2(RELOCK_HIGH_CURRENT);
             usleep(RELOCK_HIGH_HOLDTIME);
             float current = RELOCK_HIGH_CURRENT;
@@ -57,7 +57,7 @@ void update_current_lock() {
                     sprintf(slack_message_buffer, "relock at %lf\n", current);
                     send_message(slack_message_buffer);
 #endif
-                    printf("relock at %lf\n", current);
+                    fprintf(stderr, "relock at %lf\n", current);
                     return;
                 }
                 usleep(800);
@@ -69,7 +69,7 @@ void update_current_lock() {
             sprintf(slack_message_buffer, "relocking\n");
             send_message(slack_message_buffer);
 #endif
-            printf("relocking\n");
+            fprintf(stderr, "relocking\n");
             write_ch2(RELOCK_HIGH_CURRENT);
             usleep(RELOCK_HIGH_HOLDTIME);
             write_ch2(RELOCK_LOW_CURRENT);
@@ -79,7 +79,7 @@ void update_current_lock() {
         sprintf(slack_message_buffer, "relocked\n");
         send_message(slack_message_buffer);
 #endif
-        printf("relocked\n");
+        fprintf(stderr, "relocked\n");
 #endif
     } else {
         write_ch2(out);
