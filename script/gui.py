@@ -5,28 +5,29 @@ import asyncio
 from collections import defaultdict
 
 async def killall(channel):
-    p = await asyncio.create_subprocess_exec('ssh',  "slave%d-lock"%channel, 'killall', 'sweep', 'lock', stderr=asyncio.subprocess.DEVNULL)
+    p = await asyncio.create_subprocess_shell('ssh slave%d-lock "killall sweep lock"'%channel, stderr=asyncio.subprocess.DEVNULL)
     await p.wait()
+    print("slave%d-lock: unlocked"%channel)
 
 async def monitor(proc, channel):
     while True:
         await asyncio.sleep(0.2)
         try:
-            cout = await proc.stderr.readline()
+            cout = await proc.stdout.readline()
             if len(cout.strip()) > 0:
-                print("slave%d-lock: "%channel, cout.strip().decode('ascii'))
+                print("slave%d-lock: "%channel, cout.strip().decode())
         except:
             proc.kill()
             break
 
 async def sweep(channel):
-    await killall(channel)
     proc = await asyncio.create_subprocess_exec('ssh',  "slave%d-lock"%channel, '"/root/injection-auto-relock/build/sweep"', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    print('slave%d-lock: sweep at'%channel, proc)    
     await monitor(proc, channel)
 
 async def lock(channel):
-    await killall(channel)
     proc = await asyncio.create_subprocess_exec('ssh',  "slave%d-lock"%channel, '"/root/injection-auto-relock/build/lock"', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    print('slave%d-lock: lock at'%channel, proc)    
     await monitor(proc, channel)
 
 
@@ -70,11 +71,13 @@ class MyTk(Tk):
         if y == 1:
             print("Slave 1 auto relock is not set up.")
             return 
-        # cancel the action in channel 
-        # no need to kill anything 
+
+        await killall(y)
+
         for t in self.channel_task[y]:
             if not t.cancelled() and not t.done():
                 t.cancel()
+
         if x == 1:
             # sweep 
             self.channel_task[y].append(asyncio.create_task(sweep(y)))
@@ -155,6 +158,6 @@ async def main():
     await win.task[0]
     
     print("Cleaning up...")
-    await asyncio.gather(killall(1), killall(2))
+    # await asyncio.gather(killall(1), killall(2))
 
-asyncio.run(main())
+asyncio.get_event_loop().run_until_complete(main())
