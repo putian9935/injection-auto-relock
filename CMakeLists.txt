@@ -32,3 +32,15 @@ add_executable(sweep src/sweep.c)
 target_compile_options(sweep PRIVATE -Wall -Wpedantic -Wextra) 
 set_property(TARGET sweep PROPERTY C_STANDARD 11)
 target_link_libraries( sweep inj-relck ${RP_LIB} )
+
+# TARGET3: sweep-upload
+add_executable(sweep-upload src/sweep-upload.c)
+target_compile_options(sweep-upload PRIVATE -Wall -Wpedantic -Wextra -O2) 
+set_property(TARGET sweep-upload PROPERTY C_STANDARD 11)
+target_compile_definitions(
+    sweep-upload PRIVATE
+    HOST_ADDR=\"http://...:/\"
+)
+
+target_link_libraries( sweep-upload inj-relck ${RP_LIB} ${CURL_LIB} )
+
