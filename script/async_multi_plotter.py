@@ -12,7 +12,7 @@ def extract_number(data: bytearray):
 
 class AsyncMultiPlotter:
     # web address constants
-    HOST_ADDR = "172.31.20.147"
+    HOST_ADDR = ""
     CH1_PORT = 65432
     CH2_PORT = 65433
 
@@ -122,4 +122,5 @@ async def main():
     button2.grid(row=0, column=1, sticky='nsew')
     await window.task[0]
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
