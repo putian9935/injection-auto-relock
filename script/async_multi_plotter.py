@@ -3,8 +3,10 @@ import asyncio
 import matplotlib.pyplot as plt
 from http_fixed_reader import HTTPFixedReader
 from struct import unpack
+
 import matplotlib as mpl
 mpl.rcParams['toolbar'] = 'None'
+mpl.use('TkAgg')
 
 def extract_number(data: bytearray):
     return unpack('<512d', data)
@@ -45,6 +47,11 @@ class AsyncMultiPlotter:
         it1 = reader1.__aiter__()
         it2 = reader2.__aiter__()
         self.feeders = [it1.__anext__, it2.__anext__]
+
+        # make it eternal 
+        plt.pause(1e-2)
+        self.fig.canvas.manager.window.protocol('WM_DELETE_WINDOW', lambda *_:print('Please close from the terminal!'))
+
         print('Initialize done!')
 
     async def animate(self):
