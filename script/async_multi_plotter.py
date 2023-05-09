@@ -77,8 +77,7 @@ class AsyncMultiPlotter:
                         cnt += 1
                     else:
                         line.set_data([], [])
-
-                plt.pause(0.001)
+                self.fig.canvas.draw()
                 await asyncio.sleep(0)
         except Exception as e:
             # print(res)
