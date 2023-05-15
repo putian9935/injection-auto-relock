@@ -5,19 +5,14 @@ from http_fixed_reader import HTTPFixedReader
 from struct import unpack
 
 import matplotlib as mpl
-mpl.rcParams['toolbar'] = 'None'
 mpl.use('TkAgg')
 
+
 def extract_number(data: bytearray):
-    return unpack('<512d', data)
+    return unpack('<512d', data[-4096:])
 
 
 class AsyncMultiPlotter:
-    # web address constants
-    HOST_ADDR = ""
-    CH1_PORT = 65432
-    CH2_PORT = 65433
-
     def __init__(self) -> None:
         self.fig, self.ax = plt.subplots()
         self.fig.canvas.manager.set_window_title('Scope')
@@ -29,7 +24,7 @@ class AsyncMultiPlotter:
         self.x = list(range(512))
 
         # fix limit
-        self.ax.set_ylim(-.1, 1.1)
+        self.ax.set_ylim(-.4, 0.02)
         self.ax.set_xlim(-1, 513)
 
         self.loop = asyncio.get_event_loop()
@@ -47,10 +42,9 @@ class AsyncMultiPlotter:
         it1 = reader1.__aiter__()
         it2 = reader2.__aiter__()
         self.feeders = [it1.__anext__, it2.__anext__]
-
-        # make it eternal 
         plt.pause(1e-2)
-        self.fig.canvas.manager.window.protocol('WM_DELETE_WINDOW', lambda *_:print('Please close from the terminal!'))
+        self.fig.canvas.manager.window.protocol(
+            'WM_DELETE_WINDOW', lambda *_: print('Please close from the terminal!'))
 
         print('Initialize done!')
 
@@ -59,8 +53,7 @@ class AsyncMultiPlotter:
             while True:
                 if not plt.fignum_exists(self.fig.number):
                     break
-                # in case it is modified
-                channels = self.channels[:]  
+                channels = self.channels[:]  # in case it is modified
                 tasks = [
                     asyncio.create_task(it())
                     for on, it in zip(channels, self.feeders)
@@ -78,7 +71,7 @@ class AsyncMultiPlotter:
                     else:
                         line.set_data([], [])
                 self.fig.canvas.draw()
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.01)
         except Exception as e:
             # print(res)
             # print(len(res))

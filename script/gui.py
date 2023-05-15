@@ -5,27 +5,31 @@ import asyncio
 from collections import defaultdict
 from async_multi_plotter import AsyncMultiPlotter
 
+from functools import partial
+
+print = partial(print, flush=True)
+
 
 async def killall(channel):
     try:
-        p = await asyncio.create_subprocess_shell(
-            'ssh slave%d-lock "killall sweep lock sweep-upload"' % channel,
-            stderr=asyncio.subprocess.DEVNULL, stdin=asyncio.subprocess.PIPE
-        )
+        p = await asyncio.create_subprocess_shell('ssh slave%d-lock "killall sweep lock sweep-upload"' % channel,
+                                                  stderr=asyncio.subprocess.DEVNULL, stdin=asyncio.subprocess.PIPE
+                                                  )
         # no idea why, but it works (bad return value? )
         await p.communicate(b'\n\n')
         print("slave%d-lock: unlocked" % channel)
     except Exception as e:
         print(e)
+        pass
 
 
 async def monitor(proc, channel):
     while True:
         await asyncio.sleep(0.2)
         try:
-            cout = await proc.stdout.readline()
-            if len(cout.strip()) > 0:
-                print("slave%d-lock: " % channel, cout.strip().decode())
+            cerr = await proc.stderr.readline()
+            if len(cerr.strip()) > 0:
+                print("slave%d-lock: " % channel, cerr.strip().decode())
         except:
             proc.kill()
             break
@@ -60,13 +64,13 @@ class MyTk(Tk):
 
     async def aupdate(self):
         """ the Tk loop """
-        while True:
-            self.update()
-            try:
+        try:
+            while True:
+                self.update()
                 # refresh rate at 0.01
                 await asyncio.sleep(0.01)
-            except:
-                return
+        except (asyncio.CancelledError, Exception):
+            return
 
     def close(self):
         for t in self.task:
@@ -149,8 +153,10 @@ async def main():
             if(btn["text"] == "OFF"):
                 btn.configure(text="ON", bg='green')
 
-        btn = Button(win, text='OFF', font=font.Font(
-            size=14), command=combine_funcs(switch, func))
+        btn = Button(win,
+                     text='OFF',
+                     font=font.Font(size=14),
+                     command=combine_funcs(switch, func))
         return btn
 
     button_dict = {}
@@ -188,4 +194,4 @@ async def main():
 
     print("Cleaning up...")
 
-asyncio.get_event_loop().run_until_complete(main())
+asyncio.run(main())
