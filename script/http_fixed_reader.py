@@ -15,7 +15,10 @@ class HTTPFixedReader:
         """ set a a server that is waiting """
         socket.setdefaulttimeout(.05)
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind((self.host_addr, self.host_port))
+        try:
+            self.s.bind((self.host_addr, self.host_port))
+        except OSError as e :
+            raise OSError(f"The host port {self.host_port} is occupied. Please restart the program with a different port number for the instance of HTTPFixedReader or use 'netstat -o' to find out which program occupied it and shut it down.") from e 
         self.s.listen()
         return self
 
